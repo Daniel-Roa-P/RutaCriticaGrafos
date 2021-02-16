@@ -36,6 +36,8 @@ public class RutaCritica extends JFrame implements ActionListener{
     
     JTextField[][] tabla;
     ArrayList<JLabel> numeros = new ArrayList<JLabel>(); 
+    Nodo listaGrafo[];
+    Nodo listaInvertida[];
     
     int cantidadNodos = 0;
     
@@ -93,8 +95,8 @@ public class RutaCritica extends JFrame implements ActionListener{
         scrollPane3.setPreferredSize(new Dimension(1150, 400)); 
         scrollPane3.setBackground(Color.gray);        
         
-        scrollPane4.setBounds(25, 150, 2500, 2500);
-        scrollPane4.setPreferredSize(new Dimension(2500, 2500));  
+        scrollPane4.setBounds(25, 150, 500, 4000);
+        scrollPane4.setPreferredSize(new Dimension(500, 4000));  
         scrollPane4.setBackground(Color.gray);
         
         scrollPane5.setBounds(40, 180, 310, 490);
@@ -124,9 +126,6 @@ public class RutaCritica extends JFrame implements ActionListener{
                 scrollPane1.repaint();
 
                 dibujarTabla();
-                
-//                System.out.println(e.getX() + "," + e.getY());
-
 
             }
             
@@ -165,9 +164,102 @@ public class RutaCritica extends JFrame implements ActionListener{
         
     }
     
+    public void dibujarListas(){
+    
+        JLabel texto = new JLabel("Grafo original:");
+        texto.setBounds(20, 20, 500, 20);
+        texto.setForeground(Color.BLUE);
+        scrollPane4.add(texto);
+        
+        int coorY = 0;
+        
+        for(int i = 0 ; i < cantidadNodos; i++){
+            
+            String cadena = "";
+            
+            for(int j = 0; j < listaGrafo[i].hijos.size(); j++){
+                
+                cadena = cadena + listaGrafo[i].hijos.get(j).getLlave() + ", " + listaGrafo[i].hijos.get(j).getActividad() + ", " + listaGrafo[i].hijos.get(j).getCoste() + " ===> " ;
+                
+            }
+            
+            coorY =  40 + (i*30);
+            JLabel tempLabel = new JLabel(listaGrafo[i].getLlave() + ":   " + cadena + "*");
+            tempLabel.setBounds(20, coorY, 1500, 20);
+
+            scrollPane4.add(tempLabel);
+            
+        }
+
+        coorY = 50 + coorY;
+        
+        JLabel texto2 = new JLabel("Grafo Invertido:");
+        texto2.setBounds(20, coorY, 500, 20);
+        texto2.setForeground(Color.RED);
+        scrollPane4.add(texto2);
+        
+        coorY = 30 + coorY;
+        
+        for(int i = 0 ; i < cantidadNodos; i++){
+            
+            String cadena = "";
+            
+            for(int j = 0; j < listaInvertida[i].hijos.size(); j++){
+                
+                cadena = cadena + listaInvertida[i].hijos.get(j).getLlave() + ", " + listaInvertida[i].hijos.get(j).getActividad() + ", " + listaInvertida[i].hijos.get(j).getCoste() + " ===> " ;
+                
+            }
+            
+            JLabel tempLabel = new JLabel(listaInvertida[i].getLlave() + ":   " + cadena + "*");
+            tempLabel.setBounds(20, coorY + (i*30), 1500, 20);
+
+            scrollPane4.add(tempLabel);
+            
+        }
+        
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
-       
+    
+        if(e.getSource() == botonIngresar && cantidadNodos != 0){
+        
+            listaGrafo = new Nodo [cantidadNodos];
+            listaInvertida = new Nodo [cantidadNodos];
+            
+            for(int i = 0; i < cantidadNodos; i++){
+                
+                listaGrafo[i] = new Nodo(i+1, new ArrayList()); 
+                listaInvertida[i] = new Nodo(i+1, new ArrayList()); 
+                
+            }
+            
+            for(int i = 0; i < cantidadNodos; i++){
+                
+                for(int j = 0; j < cantidadNodos; j++){
+                    
+                    if(!tabla[j][i].getText().equals("")){
+                    
+                        String [] tempCadena = tabla[j][i].getText().split(",");
+                        listaGrafo[i].getHijos().add(new NodoHijo(Integer.parseInt(tempCadena[0]), Integer.parseInt(tempCadena[1]), Integer.parseInt(tempCadena[2])));
+                        listaInvertida[Integer.parseInt(tempCadena[0]) - 1].getHijos().add(new NodoHijo((i+1), Integer.parseInt(tempCadena[1]), Integer.parseInt(tempCadena[2])));
+                        
+                    } else {
+                        
+                        break;
+                        
+                    }
+
+                }
+                                
+            }
+            
+            scrollPane4.removeAll();
+            dibujarListas();
+            scrollPane4.repaint();
+            scrollPane5.setViewportView(scrollPane4);
+            
+        }
     
     }
     
