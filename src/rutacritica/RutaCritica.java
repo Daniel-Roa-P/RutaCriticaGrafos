@@ -8,10 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 public class RutaCritica extends JFrame implements ActionListener{
@@ -32,10 +34,15 @@ public class RutaCritica extends JFrame implements ActionListener{
     public JButton botonIngresar = new JButton("Dibujar y Calcular");
     public JButton botonReiniciar = new JButton("Limpiar Grafo");
     
+    JTextField[][] tabla;
+    ArrayList<JLabel> numeros = new ArrayList<JLabel>(); 
+    
+    int cantidadNodos = 0;
+    
     public static void main(String[] args) {
 
         RutaCritica rc = new RutaCritica(); 
-        rc.setBounds(0, 0, 900, 730);
+        rc.setBounds(0, 0, 1000, 730);
         rc.setTitle("Ruta Critica");
         rc.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         rc.setVisible(true);
@@ -74,7 +81,7 @@ public class RutaCritica extends JFrame implements ActionListener{
         scrollPane.setPreferredSize(new Dimension(2500, 2500));  
         scrollPane.setBackground(Color.gray);
         
-        scrollPane1.setBounds(400, 40, 440, 300);
+        scrollPane1.setBounds(400, 40, 540, 300);
         scrollPane1.setPreferredSize(new Dimension(1150, 400)); 
         scrollPane1.setBackground(Color.gray);
         
@@ -82,7 +89,7 @@ public class RutaCritica extends JFrame implements ActionListener{
         scrollPane2.setPreferredSize(new Dimension(2500, 2500));  
         scrollPane2.setBackground(Color.gray);
         
-        scrollPane3.setBounds(400, 370, 440, 300);
+        scrollPane3.setBounds(400, 370, 540, 300);
         scrollPane3.setPreferredSize(new Dimension(1150, 400)); 
         scrollPane3.setBackground(Color.gray);        
         
@@ -98,10 +105,63 @@ public class RutaCritica extends JFrame implements ActionListener{
             
             @Override 
             public void mousePressed(MouseEvent e) {
-                System.out.println(e.getX() + "," + e.getY());
+                
+                scrollPane1.removeAll();
+                
+                cantidadNodos++;
+                
+                JLabel tempLabel = new JLabel(Integer.toString(cantidadNodos));
+                tempLabel.setBounds(e.getX(), e.getY(), 20, 20);
+                
+                numeros.add(tempLabel);
+                
+                for(int i = 0; i < numeros.size(); i++){
+                    
+                    scrollPane1.add(numeros.get((numeros.size() - i) - 1));
+                    
+                }
+                
+                scrollPane1.repaint();
+
+                dibujarTabla();
+                
+//                System.out.println(e.getX() + "," + e.getY());
+
+
             }
             
         });
+        
+    }
+    
+    private void dibujarTabla(){
+        
+        scrollPane2.removeAll();
+        
+        tabla = new JTextField[cantidadNodos][cantidadNodos];
+        
+        for(int i = 0; i < cantidadNodos; i++){
+            
+            for(int j = 0; j < cantidadNodos; j++){
+                
+                tabla[i][j] = new JTextField();
+                tabla[i][j].setBounds(50 + (i*60), 25 + (j*30), 50, 20);
+                scrollPane2.add(tabla[i][j]);
+                
+            }
+            
+        }
+        
+        for(int k = 0; k < cantidadNodos; k++){
+                    
+            JLabel tempLabel = new JLabel(Integer.toString(k+1) + " ===>");
+            tempLabel.setBounds( 5, 25 + (k*30), 50, 20);
+            scrollPane2.add(tempLabel);
+            
+        }
+        
+        scrollPane2.repaint();
+        scrollPane3.setViewportView(scrollPane2);
         
     }
     
