@@ -41,8 +41,8 @@ public class RutaCritica extends JFrame implements ActionListener{
     ArrayList<JLabel> numeros = new ArrayList<JLabel>(); 
     Nodo listaGrafo[];
     Nodo listaInvertida[];
-    ArrayList <Integer> rutaCritica = new ArrayList<>();
-    
+    ArrayList <Nodo> rutaCritica = new ArrayList<>();
+    ArrayList <Integer> rutaNumeros = new ArrayList<>();
     int cantidadNodos = 0;
     
     public static void main(String[] args) {
@@ -112,35 +112,37 @@ public class RutaCritica extends JFrame implements ActionListener{
             @Override 
             public void mousePressed(MouseEvent e) {
                 
-                scrollPane1.removeAll();
+                if(cantidadNodos<9){
                 
-                cantidadNodos++;
-                
-                JLabel tempLabel = new JLabel(Integer.toString(cantidadNodos));
+                    scrollPane1.removeAll();
 
-                ImageIcon imgIcon = new ImageIcon(getClass().getResource(Integer.toString(cantidadNodos)+".png"));
+                    cantidadNodos++;
 
-                Image imgEscalada = imgIcon.getImage().getScaledInstance(15, 15, Image.SCALE_SMOOTH);
-                Icon iconoEscalado = new ImageIcon(imgEscalada);
+                    JLabel tempLabel = new JLabel(Integer.toString(cantidadNodos));
 
-                tempLabel.setIcon(iconoEscalado);            
-                tempLabel.setBounds(e.getX(), e.getY(), 15, 15);
-                tempLabel.setForeground(Color.blue);
-                
-                
-                
-                numeros.add(tempLabel);
-                
-                for(int i = 0; i < numeros.size(); i++){
-                    
-                    scrollPane1.add(numeros.get((numeros.size() - i) - 1));
-                    
+                    ImageIcon imgIcon = new ImageIcon(getClass().getResource(Integer.toString(cantidadNodos)+".png"));
+
+                    Image imgEscalada = imgIcon.getImage().getScaledInstance(15, 15, Image.SCALE_SMOOTH);
+                    Icon iconoEscalado = new ImageIcon(imgEscalada);
+
+                    tempLabel.setIcon(iconoEscalado);            
+                    tempLabel.setBounds(e.getX(), e.getY(), 15, 15);
+                    tempLabel.setForeground(Color.blue);
+
+                    numeros.add(tempLabel);
+
+                    for(int i = 0; i < numeros.size(); i++){
+
+                        scrollPane1.add(numeros.get((numeros.size() - i) - 1));
+
+                    }
+
+                    scrollPane1.repaint();
+
+                    dibujarTabla();
+
                 }
                 
-                scrollPane1.repaint();
-
-                dibujarTabla();
-
             }
             
         });
@@ -209,10 +211,8 @@ public class RutaCritica extends JFrame implements ActionListener{
         
         JLabel texto2 = new JLabel("Grafo Invertido:");
         texto2.setBounds(20, coorY, 500, 20);
-        texto2.setForeground(Color.RED);
+        texto2.setForeground(Color.ORANGE);
         scrollPane4.add(texto2);
-        
-        coorY = 30 + coorY;
         
         for(int i = 0 ; i < cantidadNodos; i++){
             
@@ -225,11 +225,51 @@ public class RutaCritica extends JFrame implements ActionListener{
             }
             
             JLabel tempLabel = new JLabel(listaInvertida[i].getLlave() + ":   " + cadena + "*");
-            tempLabel.setBounds(20, coorY + (i*30), 1500, 20);
+            
+            coorY = coorY + 30;
+            
+            tempLabel.setBounds(20, coorY, 1500, 20);
 
             scrollPane4.add(tempLabel);
             
         }
+        
+        coorY = 50 + coorY;
+        
+        JLabel texto3 = new JLabel("Ruta critica:");
+        texto3.setBounds(20, coorY, 1000, 20);
+        texto3.setForeground(Color.RED);
+        scrollPane4.add(texto3);
+        
+        String ruta = "", actividades = "";
+        
+        for(int i = 0; i < rutaCritica.size(); i++){
+            
+            ruta = ruta + rutaCritica.get(i).getLlave() + "==>";
+
+            for(int j = 0 ; j < rutaCritica.get(i).getHijos().size(); j++){
+                
+                if(rutaNumeros.contains(rutaCritica.get(i).getHijos().get(j).getLlave())){
+                    
+                    actividades = actividades + "A" + rutaCritica.get(i).getHijos().get(j).getActividad() + ", ";
+                
+                }
+    
+            }
+            
+        }
+        
+        coorY = 30 + coorY;
+        
+        JLabel texto4 = new JLabel("Eventos (nodos): " + ruta + " *");
+        texto4.setBounds(20, coorY, 1000, 20);
+        scrollPane4.add(texto4);
+        
+        coorY = 30 + coorY;
+        
+        JLabel texto5 = new JLabel("Actividades: " + actividades);
+        texto5.setBounds(20, coorY, 1000, 20);
+        scrollPane4.add(texto5);
         
     }
     
@@ -264,8 +304,20 @@ public class RutaCritica extends JFrame implements ActionListener{
                 
                 int coorY = 0;
                 
-                if(rutaCritica.contains(Integer.parseInt(padre.getText())) && rutaCritica.contains(Integer.parseInt(hijo.getText()))){
+                int aciertos = 0;
+                
+                for(int k = 0; k < rutaCritica.size(); k++){
+                    
+                    if( (rutaCritica.get(k).getLlave() == Integer.parseInt(padre.getText())) || (rutaCritica.get(k).getLlave() == Integer.parseInt(hijo.getText())) ){
+                    
+                        aciertos++;
                         
+                    }
+                       
+                }
+                
+                if(aciertos == 2){ 
+                    
                     cadena = "r";
                     
                 } else {
@@ -314,6 +366,21 @@ public class RutaCritica extends JFrame implements ActionListener{
             
         }
         
+        for (int i = 0 ; i < cantidadNodos; i++){
+            
+            JLabel tempTemprano = new JLabel(Integer.toString(listaGrafo[i].getTiempoTemprano()));          
+            tempTemprano.setForeground(Color.red);
+            tempTemprano.setBounds(numeros.get(i).getX(), numeros.get(i).getY() - 25, 20, 20);
+            
+            JLabel tempTardio = new JLabel(Integer.toString(listaGrafo[i].getTiempoTardio()));
+            tempTardio.setForeground(Color.blue);
+            tempTardio.setBounds(numeros.get(i).getX(), numeros.get(i).getY() + 25, 20, 20);
+            
+            scrollPane1.add(tempTemprano);
+            scrollPane1.add(tempTardio);
+            
+        }
+        
         scrollPane1.repaint();
                 
     }
@@ -347,9 +414,7 @@ public class RutaCritica extends JFrame implements ActionListener{
     public void calcularTardios(Nodo nodo){
         
         for(int i = 0; i < nodo.getHijos().size(); i++){
-//            
-//            System.out.println(nodo.getLlave() + "proceso tardio: " + nodo.getTiempoTardio());
-            
+    
             if((nodo.getTiempoTardio() - nodo.getHijos().get(i).getCoste()) <= listaInvertida[nodo.getHijos().get(i).getLlave()-1].getTiempoTardio()){
             
                 listaInvertida[nodo.getHijos().get(i).getLlave()-1].setTiempoTardio( (nodo.getTiempoTardio() - nodo.getHijos().get(i).getCoste()) );
@@ -421,8 +486,8 @@ public class RutaCritica extends JFrame implements ActionListener{
                 
                 if(listaGrafo[i].getTiempoTardio() == listaGrafo[i].getTiempoTemprano()){
                 
-                    rutaCritica.add(listaGrafo[i].getLlave());
-                    
+                    rutaCritica.add(listaGrafo[i]);
+                    rutaNumeros.add(listaGrafo[i].getLlave());
                 }
                 
             }
