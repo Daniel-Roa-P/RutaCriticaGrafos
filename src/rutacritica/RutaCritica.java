@@ -4,11 +4,14 @@ package rutacritica;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -79,29 +82,29 @@ public class RutaCritica extends JFrame implements ActionListener{
         label2.setBounds(400, 350, 500, 20);
         label3.setBounds(40, 150, 500, 20);
         
-        scrollPane.setBounds(25, 150, 2500, 2500);
+        scrollPane.setBounds(400, 40, 2500, 2500);
         scrollPane.setPreferredSize(new Dimension(2500, 2500));  
-        scrollPane.setBackground(Color.gray);
+        scrollPane.setBackground(Color.WHITE);
         
         scrollPane1.setBounds(400, 40, 540, 300);
         scrollPane1.setPreferredSize(new Dimension(1150, 400)); 
-        scrollPane1.setBackground(Color.gray);
+        scrollPane1.setBackground(Color.WHITE);
         
         scrollPane2.setBounds(750, 150, 2500, 2500);
         scrollPane2.setPreferredSize(new Dimension(2500, 2500));  
-        scrollPane2.setBackground(Color.gray);
+        scrollPane2.setBackground(Color.WHITE);
         
         scrollPane3.setBounds(400, 370, 540, 300);
         scrollPane3.setPreferredSize(new Dimension(1150, 400)); 
-        scrollPane3.setBackground(Color.gray);        
+        scrollPane3.setBackground(Color.WHITE);        
         
         scrollPane4.setBounds(25, 150, 500, 4000);
         scrollPane4.setPreferredSize(new Dimension(500, 4000));  
-        scrollPane4.setBackground(Color.gray);
+        scrollPane4.setBackground(Color.WHITE);
         
         scrollPane5.setBounds(40, 180, 310, 490);
         scrollPane5.setPreferredSize(new Dimension(1150, 400)); 
-        scrollPane5.setBackground(Color.gray);
+        scrollPane5.setBackground(Color.WHITE);
         
         scrollPane1.addMouseListener(new MouseAdapter() {
             
@@ -113,7 +116,8 @@ public class RutaCritica extends JFrame implements ActionListener{
                 cantidadNodos++;
                 
                 JLabel tempLabel = new JLabel(Integer.toString(cantidadNodos));
-                tempLabel.setBounds(e.getX(), e.getY(), 20, 20);
+                tempLabel.setBounds(e.getX(), e.getY(), 10, 10);
+                tempLabel.setForeground(Color.blue);
                 
                 numeros.add(tempLabel);
                 
@@ -219,10 +223,100 @@ public class RutaCritica extends JFrame implements ActionListener{
         
     }
     
+    public void dibujarGrafo(){
+        
+        JLabel padre = new JLabel(), hijo = new JLabel(), predecesor = new JLabel();
+        String cadena = "v"; 
+        
+        for(int i = 0 ; i < numeros.size(); i++){
+            
+            Nodo tempPadre = listaGrafo[i];
+            
+            for(int j = 0; j< tempPadre.getHijos().size(); j++){
+            
+                NodoHijo tempHijo = tempPadre.getHijos().get(j); 
+                
+                for(int k = 0 ; k < numeros.size(); k++){
+                   
+                    if(numeros.get(k).getText().equals(Integer.toString(tempHijo.getLlave()))){
+                   
+                        hijo = numeros.get(k);
+                       
+                    }
+                   
+                    if(numeros.get(k).getText().equals(Integer.toString(tempPadre.getLlave()))){
+                   
+                        padre = numeros.get(k);
+                       
+                    }
+                
+                }
+                
+                int coorY = 0;
+                
+                if(padre.getY() >= hijo.getY()){
+
+                    cadena = cadena + "Arriba";
+                    coorY = padre.getY() - Math.abs(padre.getY() - hijo.getY());
+                    
+                } else {
+
+                    cadena = cadena + "Abajo";
+                    coorY = padre.getY();
+                    
+                }
+
+                if(padre.getX() <= hijo.getX()){
+
+                    cadena = cadena + "Adelante.png";
+                    predecesor = padre;
+
+                } else {
+
+                    cadena = cadena + "Atras.png";
+                    predecesor = hijo;
+
+                }
+
+                System.out.println(padre.getText() + " , x: " + padre.getX() + " , y: "  + padre.getY());
+                System.out.println(hijo.getText() + " , x: " + hijo.getX() + " , y: "  + hijo.getY());
+
+                System.out.println(cadena);
+
+                JLabel img = new JLabel();
+
+                ImageIcon imgIcon = new ImageIcon(getClass().getResource(cadena));
+
+                Image imgEscalada = imgIcon.getImage().getScaledInstance(Math.abs(padre.getX() - hijo.getX()), Math.abs(padre.getY() - hijo.getY()), Image.SCALE_SMOOTH);
+                Icon iconoEscalado = new ImageIcon(imgEscalada);
+
+                img.setIcon(iconoEscalado);
+                img.setBounds(predecesor.getX(), coorY, Math.abs(padre.getX() - hijo.getX()), Math.abs(padre.getY() - hijo.getY()));
+
+                scrollPane1.add(img);
+
+                cadena = "v";
+
+            }
+            
+        }
+        
+//        for(int i = 0 ; i < cantidadNodos; i++){
+//            
+//            for(int j = 0; j < listaGrafo[i].hijos.size(); j++){
+//                
+//            }
+//            
+//        }
+        
+        scrollPane1.repaint();
+                
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
     
-        if(e.getSource() == botonIngresar && cantidadNodos != 0){
+        if(e.getSource() == botonIngresar ){
         
             listaGrafo = new Nodo [cantidadNodos];
             listaInvertida = new Nodo [cantidadNodos];
@@ -256,8 +350,12 @@ public class RutaCritica extends JFrame implements ActionListener{
             
             scrollPane4.removeAll();
             dibujarListas();
+            dibujarGrafo();
             scrollPane4.repaint();
             scrollPane5.setViewportView(scrollPane4);
+            
+            scrollPane.removeAll();
+
             
         }
     
