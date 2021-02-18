@@ -41,6 +41,7 @@ public class RutaCritica extends JFrame implements ActionListener{
     ArrayList<JLabel> numeros = new ArrayList<JLabel>(); 
     Nodo listaGrafo[];
     Nodo listaInvertida[];
+    ArrayList <Integer> rutaCritica = new ArrayList<>();
     
     int cantidadNodos = 0;
     
@@ -116,8 +117,17 @@ public class RutaCritica extends JFrame implements ActionListener{
                 cantidadNodos++;
                 
                 JLabel tempLabel = new JLabel(Integer.toString(cantidadNodos));
-                tempLabel.setBounds(e.getX(), e.getY(), 10, 10);
+
+                ImageIcon imgIcon = new ImageIcon(getClass().getResource(Integer.toString(cantidadNodos)+".png"));
+
+                Image imgEscalada = imgIcon.getImage().getScaledInstance(15, 15, Image.SCALE_SMOOTH);
+                Icon iconoEscalado = new ImageIcon(imgEscalada);
+
+                tempLabel.setIcon(iconoEscalado);            
+                tempLabel.setBounds(e.getX(), e.getY(), 15, 15);
                 tempLabel.setForeground(Color.blue);
+                
+                
                 
                 numeros.add(tempLabel);
                 
@@ -226,7 +236,7 @@ public class RutaCritica extends JFrame implements ActionListener{
     public void dibujarGrafo(){
         
         JLabel padre = new JLabel(), hijo = new JLabel(), predecesor = new JLabel();
-        String cadena = "v"; 
+        String cadena; 
         
         for(int i = 0 ; i < numeros.size(); i++){
             
@@ -254,6 +264,16 @@ public class RutaCritica extends JFrame implements ActionListener{
                 
                 int coorY = 0;
                 
+                if(rutaCritica.contains(Integer.parseInt(padre.getText())) && rutaCritica.contains(Integer.parseInt(hijo.getText()))){
+                        
+                    cadena = "r";
+                    
+                } else {
+                
+                    cadena = "v";
+                    
+                }
+                
                 if(padre.getY() >= hijo.getY()){
 
                     cadena = cadena + "Arriba";
@@ -278,11 +298,6 @@ public class RutaCritica extends JFrame implements ActionListener{
 
                 }
 
-                System.out.println(padre.getText() + " , x: " + padre.getX() + " , y: "  + padre.getY());
-                System.out.println(hijo.getText() + " , x: " + hijo.getX() + " , y: "  + hijo.getY());
-
-                System.out.println(cadena);
-
                 JLabel img = new JLabel();
 
                 ImageIcon imgIcon = new ImageIcon(getClass().getResource(cadena));
@@ -295,28 +310,72 @@ public class RutaCritica extends JFrame implements ActionListener{
 
                 scrollPane1.add(img);
 
-                cadena = "v";
-
             }
             
         }
-        
-//        for(int i = 0 ; i < cantidadNodos; i++){
-//            
-//            for(int j = 0; j < listaGrafo[i].hijos.size(); j++){
-//                
-//            }
-//            
-//        }
         
         scrollPane1.repaint();
                 
     }
     
+    public void calcularTempranos(Nodo nodo){
+        
+        for(int i = 0; i < nodo.getHijos().size(); i++){
+            
+            if(listaGrafo[nodo.getHijos().get(i).getLlave()-1].getTiempoTemprano() <= (nodo.getTiempoTemprano() + nodo.getHijos().get(i).getCoste())){
+            
+                listaGrafo[nodo.getHijos().get(i).getLlave()-1].setTiempoTemprano((nodo.getTiempoTemprano() + nodo.getHijos().get(i).getCoste()));
+             
+                calcularTempranos(listaGrafo[nodo.getHijos().get(i).getLlave()-1]);
+                
+            }
+            
+        }
+        
+    }
+    
+    public void completarInversa(){
+        
+        for(int i = 0; i < cantidadNodos; i++){
+            
+            listaInvertida[i].setTiempoTemprano(listaGrafo[listaInvertida[i].getLlave()-1].getTiempoTemprano());
+            
+        }
+        
+    }
+    
+    public void calcularTardios(Nodo nodo){
+        
+        for(int i = 0; i < nodo.getHijos().size(); i++){
+//            
+//            System.out.println(nodo.getLlave() + "proceso tardio: " + nodo.getTiempoTardio());
+            
+            if((nodo.getTiempoTardio() - nodo.getHijos().get(i).getCoste()) <= listaInvertida[nodo.getHijos().get(i).getLlave()-1].getTiempoTardio()){
+            
+                listaInvertida[nodo.getHijos().get(i).getLlave()-1].setTiempoTardio( (nodo.getTiempoTardio() - nodo.getHijos().get(i).getCoste()) );
+             
+                calcularTardios(listaInvertida[nodo.getHijos().get(i).getLlave()-1]);
+                
+            }
+            
+        }
+        
+    }
+    
+    public void completarOriginal(){
+        
+        for(int i = 0; i < cantidadNodos; i++){
+            
+            listaGrafo[i].setTiempoTardio(listaInvertida[listaGrafo[i].getLlave()-1].getTiempoTardio());
+            
+        }
+        
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
     
-        if(e.getSource() == botonIngresar ){
+        if(e.getSource() == botonIngresar && cantidadNodos != 0){
         
             listaGrafo = new Nodo [cantidadNodos];
             listaInvertida = new Nodo [cantidadNodos];
@@ -349,14 +408,32 @@ public class RutaCritica extends JFrame implements ActionListener{
             }
             
             scrollPane4.removeAll();
+            
+            calcularTempranos(listaGrafo[0]);
+            completarInversa();
+            
+            listaInvertida[cantidadNodos-1].setTiempoTardio(listaGrafo[cantidadNodos-1].getTiempoTemprano());
+            
+            calcularTardios(listaInvertida[cantidadNodos-1]);
+            completarOriginal();
+            
+            for(int i = 0; i < cantidadNodos; i++){
+                
+                if(listaGrafo[i].getTiempoTardio() == listaGrafo[i].getTiempoTemprano()){
+                
+                    rutaCritica.add(listaGrafo[i].getLlave());
+                    
+                }
+                
+            }
+            
             dibujarListas();
             dibujarGrafo();
             scrollPane4.repaint();
             scrollPane5.setViewportView(scrollPane4);
             
             scrollPane.removeAll();
-
-            
+ 
         }
     
     }

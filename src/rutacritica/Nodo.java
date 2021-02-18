@@ -6,8 +6,8 @@ import java.util.ArrayList;
 public class Nodo {
     
     int llave;
-    int tiempoTemprano;
-    int tiempoTardio;
+    int tiempoTemprano = 0;
+    int tiempoTardio = 10000;
     
     ArrayList <NodoHijo> hijos = new ArrayList();
     
